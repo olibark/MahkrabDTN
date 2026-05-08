@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mahkrabdtn"
+version = "0.0.1"
+readme = "README.md"
+description = "Delay-tolerant encrypted messaging"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Oliver Barkham"}]
+requires-python = ">=3.11"
+dependencies = ["cryptography>=45,<46"]
+
+[project.scripts]
+mkdtn = "mahkrabdtn.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.urls]
+Homepage = "https://github.com/olibark/MahkrabDTN"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-s"
