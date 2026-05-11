@@ -4,7 +4,7 @@ from typing import Any, Mapping
 from uuid import UUID, uuid4
 
 from mahkrabdtn.protocol.tools.time import utcnow
-from mahkrabdtn.protocol.parsing.datetime import parse_datetime
+from mahkrabdtn.protocol.parsing.time import parse_datetime
 from mahkrabdtn.protocol.parsing.uuid import parse_uuid
 from mahkrabdtn.protocol.parsing.text import parse_text
 from mahkrabdtn.protocol.encryption import EncryptionMetadata
