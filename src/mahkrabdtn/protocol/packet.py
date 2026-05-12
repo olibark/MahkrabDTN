@@ -69,4 +69,5 @@ class MessagePacket:
                 if data.get("expires") is not None 
                 else None
             ),
+            version=parse_text(data.get("version", "1.0"), "version"),
         )
