@@ -8,6 +8,7 @@ from hashlib import sha256
 
 from mahkrabdtn.protocol.encryption import EncryptionMetadata
 from mahkrabdtn.protocol.parsing.text import parse_text
+from mahkrabdtn.crypto.constants import ALGORITHM, ENCODING
 
 
 @dataclass(slots=True)
@@ -21,8 +22,7 @@ class RsaEncryption:
         publicKeyPem = parse_text(publicKeyPem, "publicKeyPem")
         key = serialization.load_der_public_key(publicKeyPem.encode("utf-8"))
         
-        if not isinstance(key, RSAPublicKey):
-            raise TypeError("publicKeyPem must be of type RSAPublicKey")
+        if not isinstance(key, RSAPublicKey): raise TypeError("publicKeyPem must be of type RSAPublicKey")
         
         return key
     
@@ -30,8 +30,8 @@ class RsaEncryption:
         privateKeyPem = parse_text(privateKeyPem, "privateKeyPem")
         key = serialization.load_pem_private_key(privateKeyPem.encode("utf-8"))
         
-        if not isinstance(key, RSAPrivateKey):
-            raise TypeError("private key must be of type RSA private key")
+        if not isinstance(key, RSAPrivateKey): raise TypeError("private key must be of type RSA private key")
+        
         return key
     
     def serialize_public_key(publicKey: RSAPublicKey) -> str:
@@ -89,9 +89,9 @@ class RsaEncryption:
         )
         encoded = b64encode(ciphertext).decode("ascii")
         metadata = EncryptionMetadata(
-            algorithm="rsa-oaep-sha256",
-            encoding="base64",
-            recipientKeyID=RsaEncryption.compute_public_key_ID(recipientPublicKeyPem)
+            algorithm=ALGORITHM,
+            encoding=ENCODING,
+            recipientKeyID=RsaEncryption.compute_public_key_ID(recipientPublicKeyPem),
         )
         return encoded, metadata
     
@@ -99,8 +99,8 @@ class RsaEncryption:
         ciphertext = parse_text(ciphertext, "ciphertext")
         
         if metadata.algorithm == "none": return ciphertext
-        if metadata.algorithm != "rsa-oaep-sha256": raise ValueError(f"unsupported encrypyion algorithm: {metadata.algorithm}")
-        if metadata.encoding != "base64": raise ValueError(f"unsupported encoding: {metadata.encoding}")
+        if metadata.algorithm != ALGORITHM: raise ValueError(f"unsupported encryption algorithm: {metadata.algorithm}")
+        if metadata.encoding != ENCODING: raise ValueError(f"unsupported encoding: {metadata.encoding}")
         
         privateKey = RsaEncryption.load_private_key(privateKeyPem)
         ownPublicKeyPem = RsaEncryption.serialize_public_key(privateKey.public_key())

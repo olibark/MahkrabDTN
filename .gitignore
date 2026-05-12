@@ -44,3 +44,5 @@ out
 out/
 source.txt
 uv.lock
+.mkconfig
+todo
