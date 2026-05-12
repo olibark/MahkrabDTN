@@ -1,9 +1,11 @@
-from dataclasses import dataclass
+from typing import Mapping, Any
 from datetime import datetime
+from dataclasses import dataclass, field
 
-from mahkrabdtn.protocol.parsing.text import parse_text
-from mahkrabdtn.protocol.parsing.uuid import parse_uuid
-
+from mahkrabdtn.parsing.text import parse_text
+from mahkrabdtn.parsing.uuid import parse_uuid
+from mahkrabdtn.parsing.time import parse_datetime
+from mahkrabdtn.helpers.time import utcnow
 
 @dataclass(Slots=True)
 class NodeRegistration:
@@ -25,3 +27,13 @@ class NodeRegistration:
             payload["publicKey"] = self.publicKey
             
         return payload
+    
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> "NodeRegistration":
+        return cls(
+            nodeId=parse_uuid(data["nodeID"], "nodeID"),
+            lastSeen=parse_datetime(
+                data.get("lastSeen", utcnow()),
+                "lastSeen",
+            )
+        )

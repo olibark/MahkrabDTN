@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Mapping
 
-from mahkrabdtn.protocol.parsing.text import parse_text
+from mahkrabdtn.parsing.text import parse_text
 
 
 @dataclass
