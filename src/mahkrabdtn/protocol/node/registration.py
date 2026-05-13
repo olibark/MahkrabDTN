@@ -2,9 +2,9 @@ from typing import Mapping, Any
 from datetime import datetime
 from dataclasses import dataclass, field
 
-from mahkrabdtn.parsing.text import parse_text
-from mahkrabdtn.parsing.uuid import parse_uuid
-from mahkrabdtn.parsing.time import parse_datetime
+from mahkrabdtn.tools.parsing.text import parse_text
+from mahkrabdtn.tools.parsing.uuid import parse_uuid
+from mahkrabdtn.tools.parsing.time import parse_datetime
 from mahkrabdtn.helpers.time import utcnow
 
 @dataclass(Slots=True)

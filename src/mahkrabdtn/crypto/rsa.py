@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from hashlib import sha256
 
 from mahkrabdtn.protocol.encryption import EncryptionMetadata
-from mahkrabdtn.parsing.text import parse_text
+from mahkrabdtn.tools.parsing.text import parse_text
 from mahkrabdtn.crypto.constants import ALGORITHM, ENCODING
 
 
