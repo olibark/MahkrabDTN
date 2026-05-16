@@ -11,7 +11,7 @@ from time import sleep
 from random import uniform
 
 from mahkrabdtn.client.store.processedmessages import ProcessedMessagesStore
-from mahkrabdtn.client.policys import RelayRetryPolicy
+from mahkrabdtn.client.networking.policys import RelayRetryPolicy
 from mahkrabdtn.crypto.rsa import RsaEncryption
 from mahkrabdtn.protocol.node.registration import NodeRegistration
 from mahkrabdtn.client.networking.error import RelayClientError
@@ -57,7 +57,7 @@ class RelayNodeClient:
         pair = RsaEncryption.create_node_key_pair(identityPath)
         
         return cls(
-            baseURL=baseURL.rstip("/"),
+            baseURL=baseURL.rstrip("/"),
             nodeID=create_node_id(identityPath),
             privateKeyPem=pair.privateKeyPem,
             publicKeyPem=pair.publicKeyPem,
@@ -75,7 +75,7 @@ class RelayNodeClient:
         
     def register(self) -> NodeRegistration:
         response = self.send_json_request(
-            mathod="POST",
+            method="POST",
             path="/nodes/register",
             payload={
                 "nodeID": str(self.nodeID),
@@ -186,7 +186,7 @@ class RelayNodeClient:
         
         for message in response.messages:
             decryptedMessage = self.decrypt_message_packet(message)
-            if self.processedMessagesStore.processed_message(decryptedMessage):
+            if self.processedMessagesStore.processed_message(decryptedMessage.messageID):
                 logger.info(
                     "client.message.duplicate_supressed",
                     extra={

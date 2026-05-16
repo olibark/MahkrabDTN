@@ -3,7 +3,7 @@ from typing import Any, Mapping
 from uuid import UUID, uuid4
 from dataclasses import dataclass, field
 
-from mahkrabdtn.protocol.encryption import EncryptionMetadata
+from mahkrabdtn.crypto.metadata import EncryptionMetadata
 from mahkrabdtn.tools.parsing.time import parse_datetime
 from mahkrabdtn.tools.parsing.uuid import parse_uuid
 from mahkrabdtn.tools.parsing.text import parse_text
@@ -40,6 +40,16 @@ class MessagePacket:
         if self.expires is not None and self.expires <= self.created:
             raise ValueError("expires at must be later than created at")
         
+    def is_expired(self, referenceTime: datetime | None = None) -> bool:
+        if self.expires is None:
+            return False
+        comparisonTime = utcnow() if referenceTime is None else parse_datetime(
+            referenceTime,
+            "referenceTime",
+        )   
+        
+        return self.expires <= comparisonTime
+    
     def to_dict(self) -> dict[str, object]:
         payload = {
             "messageID": str(self.messageID),
@@ -58,7 +68,7 @@ class MessagePacket:
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "MessagePacket":
         return cls(
-            massageID=parse_uuid(data["messageID"], "messageID"),
+            messageID=parse_uuid(data["messageID"], "messageID"),
             senderID=parse_uuid(data["senderID"], "senderID"),
             recipientID=parse_uuid(data["recipientID"], "recipientID"),
             created=parse_datetime(data["created"], "created"),

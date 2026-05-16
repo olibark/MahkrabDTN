@@ -3,7 +3,7 @@ from datetime import datetime
 from uuid import UUID
 from dataclasses import dataclass, field
 
-from mahkrabdtn.client.policys import ProcessedMessageRetentionPolicy
+from mahkrabdtn.client.networking.policys import ProcessedMessageRetentionPolicy
 from mahkrabdtn.tools.database.connect import connect_database
 from mahkrabdtn.helpers.resolve import resolve_processed_messages_path
 from mahkrabdtn.tools.parsing.uuid import parse_uuid
@@ -27,7 +27,7 @@ class ProcessedMessagesStore:
    
     def __post_init__(self):
         self.databasePath = Path(self.databasePath)
-        self.databasePath.parent.mkdir(parent=True, exist_ok=True)
+        self.databasePath.parent.mkdir(parents=True, exist_ok=True)
         if not isinstance(self.retentionPolicy, ProcessedMessageRetentionPolicy): 
             raise TypeError("retentionPolicy must be of type ProcessedMessageRetentionPolicy")
         self.initialize_schema()
@@ -114,6 +114,13 @@ class ProcessedMessagesStore:
         cutoff = referanceTime - self.retentionPolicy.maxAge
         
         with connect_database(self.databasePath) as connection:
+            connection.execute(
+                """
+                DELETE FROM processedMessages
+                WHERE processedAt < ?
+                """,
+                (cutoff.isoformat(),),
+            )
             connection.execute(
                 """
                 DELETE FROM processedMessages

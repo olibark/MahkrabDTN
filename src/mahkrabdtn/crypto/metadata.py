@@ -18,6 +18,9 @@ class EncryptionMetadata:
                 self.recipientKeyID, "recipientKeyID"
             )
     
+    def none(cls) -> "EncryptionMetadata":
+        return cls()
+    
     def to_dict(self) -> dict[str, str]:
         payload = {
             "algorithm": self.algorithm,
@@ -28,3 +31,10 @@ class EncryptionMetadata:
             payload["recipientKeyID"] = self.recipientKeyID
         
         return payload
+    
+    def from_dict(cls, data: Mapping[str, Any ]) -> "EncryptionMetadata":
+        return cls(
+            algorithm=parse_text(data.get("algorithm", "none"), "algorithm"),
+            encoding=parse_text(data.get("encoding", "utf-8"), "encoding"),
+            recipientKeyID=data.get("recipientKeyID"),
+        )

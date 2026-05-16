@@ -6,7 +6,7 @@ from base64 import b64decode, b64encode
 from dataclasses import dataclass
 from hashlib import sha256
 
-from mahkrabdtn.protocol.encryption import EncryptionMetadata
+from mahkrabdtn.crypto.metadata import EncryptionMetadata
 from mahkrabdtn.tools.parsing.text import parse_text
 from mahkrabdtn.crypto.constants import ALGORITHM, ENCODING
 
@@ -20,7 +20,7 @@ class NodeKeyPair:
 class RsaEncryption:
     def load_public_key(publicKeyPem: str) -> RSAPublicKey:
         publicKeyPem = parse_text(publicKeyPem, "publicKeyPem")
-        key = serialization.load_der_public_key(publicKeyPem.encode("utf-8"))
+        key = serialization.load_pem_public_key(publicKeyPem.encode("utf-8"))
         
         if not isinstance(key, RSAPublicKey): raise TypeError("publicKeyPem must be of type RSAPublicKey")
         
@@ -66,7 +66,7 @@ class RsaEncryption:
         return NodeKeyPair(
             privateKeyPem=privateKeyPem,
             publicKeyPem=publicKeyPem,
-        ),
+        )
         
     def compute_public_key_ID(publicKeyPem: str) -> str:
         publicKey = RsaEncryption.load_public_key(publicKeyPem)

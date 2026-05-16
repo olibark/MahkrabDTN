@@ -1,4 +1,4 @@
-from mahkrabdtn.protocol.encryption import EncryptionMetadata
+from mahkrabdtn.crypto.metadata import EncryptionMetadata
 from mahkrabdtn.protocol.packet import MessagePacket
 from mahkrabdtn.protocol.states import DeliveryState
 
