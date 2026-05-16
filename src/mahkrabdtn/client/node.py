@@ -16,8 +16,9 @@ from mahkrabdtn.crypto.rsa import RsaEncryption
 from mahkrabdtn.protocol.node.registration import NodeRegistration
 from mahkrabdtn.client.networking.error import RelayClientError
 from mahkrabdtn.protocol.packet import MessagePacket
-from mahkrabdtn.client.reciepts import MessageSubmissionReceipt
-from mahkrabdtn.protocol.
+from mahkrabdtn.protocol.node.messageack import MessageAcknowledgment
+from mahkrabdtn.client.reciepts import MessageSubmissionReceipt, MessageAcknowledgmentReceipt
+from mahkrabdtn.protocol.node.pollresponse import PollResponse
 from mahkrabdtn.tools.parsing.uuid import parse_uuid
 from mahkrabdtn.client.networking.error import is_retryable_http_error
 
@@ -156,8 +157,81 @@ class RelayNodeClient:
         return receipt
     
 
-    def poll_messages(self, timeout: int = 0) -> PollResponse:
+    def poll_messages(self, timeout_ms: int = 0) -> PollResponse:
+        if timeout_ms < 0: raise ValueError("timeout must be positive")
+        if timeout_ms and self.timeout <= (timeout_ms / 1000): raise ValueError("timeout must be greater than timeout_ms /1000")
         
+        query = parse.urlencode(
+            {
+                "nodeID": str(self.nodeID),
+                "timeout_ms": str(timeout_ms),
+            }
+        )
+        
+        responseData = self.send_json_request(
+            method="GET",
+            path=f"/messages/poll?{query}",
+        )
+        response = PollResponse.from_dict(responseData)
+        logger.info(
+            "client.pole.received",
+            extra={
+                "nodeID": str(self.nodeID),
+                "messageCount": len(response.messages),
+                "timeout_ms": timeout_ms,
+            },
+        )
+        
+        fresh: list[MessagePacket] = []
+        
+        for message in response.messages:
+            decryptedMessage = self.decrypt_message_packet(message)
+            if self.processedMessagesStore.processed_message(decryptedMessage):
+                logger.info(
+                    "client.message.duplicate_supressed",
+                    extra={
+                        "nodeID": str(self.nodeID),
+                        "messageID": str(decryptedMessage.messageID),
+                    },
+                )
+                
+                self.acknowledge_duplicate(decryptedMessage.messageID)
+                continue
+        
+            self.processedMessagesStore.mark_processed(decryptedMessage.messageID)
+            logger.info(
+                "client.message.processed",
+                extra={
+                    "nodeID": str(self.nodeID),
+                    "messageID": str(decryptedMessage.messageID),
+                    "senderID": str(decryptedMessage.senderID),
+                },
+            )
+            fresh.append(decryptedMessage)
+        
+        return PollResponse(
+            nodeID=response.nodeID,
+            messages=fresh,
+            serverTime=response.serverTime,
+        )
+        
+    def decrypt_message_packet(self, packet: MessagePacket) -> MessagePacket:
+        plaintext = RsaEncryption.decrypt(
+            packet.payload,
+            privateKeyPem=self.privateKeyPem,
+            metadata=packet.encryption,
+        )
+        
+        return MessagePacket(
+            messageID=packet.messageID,
+            senderID=packet.senderID,
+            recipientID=packet.recipientID,
+            created=packet.created,
+            expires=packet.expires,
+            payload=plaintext,
+            encryption=packet.encryption,
+            version=packet.version,
+        )
         
     def send_json_request(
         self, method: str, path: str, 
@@ -259,6 +333,39 @@ class RelayNodeClient:
             self.sleep_retry(attempt)
         
         raise AssertionError("how did we get here?")
+       
+    def acknowledge_message(self, messageID: UUID) -> MessageAcknowledgmentReceipt:
+        acknowledgment = MessageAcknowledgment(
+            messageID=messageID,
+            nodeID=self.nodeID,
+        )
+        responseData = self.send_json_request(
+            method="POST",
+            path=f"/messages/{messageID}/ack",
+            payload=acknowledgment.to_dict(),
+        )
+        receipt = MessageAcknowledgmentReceipt.from_dict(responseData)
+        logger.info(
+            "client.message.acknowledged",
+            extra={
+                "nodeID": str(self.nodeID),
+                "messageID": str(receipt.messageID),
+                "state": receipt.state.value,
+            },
+        )
+        return receipt
+    
+    def acknowledge_duplicate(self, messageID: UUID) -> None:
+        try: self.acknowledge_message(messageID)
+        except RelayClientError:
+            logger.warning(
+                "client.message.duplicate_ack_failed",
+                extra={
+                    "nodeID": str(self.nodeID),
+                    "messageID": str(self.nodeID),
+                },
+            )   
+            return
             
     def resolve_recipient_public_key(self, recipientID: UUID) -> str:
         registration = self.fetch_node_registration(recipientID)
