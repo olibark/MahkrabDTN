@@ -2,6 +2,7 @@ from uuid import UUID
 from dataclasses import dataclass
 from typing import Mapping
 
+
 from mahkrabdtn.protocol.states import DeliveryState
 from mahkrabdtn.tools.parsing.uuid import parse_uuid
 
@@ -20,7 +21,7 @@ class MessageSubmissionReceipt:
     @classmethod
     def from_dict(cls, data: Mapping[str, str]) -> "MessageSubmissionReceipt":
         return cls(
-            messageID=parse_uuid(data["messageID"]),
+            messageID=parse_uuid(data["messageID"], "messageID"),
             state=DeliveryState(data["state"]),
         )
         
@@ -38,6 +39,6 @@ class MessageAcknowledgmentReceipt:
     @classmethod
     def from_dict(cls, data: Mapping[str, str]) -> "MessageAcknowledgmentReceipt":
         return cls(
-            messageID=parse_uuid(data["messageID"]),
+            messageID=parse_uuid(data["messageID"], "messageID"),
             state=DeliveryState(data["state"])
         )

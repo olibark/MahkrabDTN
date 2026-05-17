@@ -7,20 +7,20 @@ from mahkrabdtn.tools.parsing.uuid import parse_uuid
 from mahkrabdtn.tools.parsing.time import parse_datetime
 from mahkrabdtn.helpers.time import utcnow
 
-@dataclass(Slots=True)
+@dataclass(slots=True)
 class NodeRegistration:
     nodeID: str
-    lastSeen: datetime
-    publicKey: str
+    lastSeen: datetime = field(default_factory=utcnow)
+    publicKey: str | None = None
     
     def __post_init__(self):
         self.nodeID = parse_uuid(self.nodeID, "nodeID")
-        self.lastSeen = parse_text(self.lastSeen, "lastSeen")
+        self.lastSeen = parse_datetime(self.lastSeen, "lastSeen")
         if self.publicKey is not None: self.publicKey = parse_text(self.publicKey, "publicKey")
             
     def to_dict(self) -> dict[str, str]:
         payload = {
-            "nodeID": self.nodeID,
+            "nodeID": str(self.nodeID),
             "lastSeen": self.lastSeen.isoformat(),
         }
         if self.publicKey is not None: 
@@ -31,9 +31,10 @@ class NodeRegistration:
     @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "NodeRegistration":
         return cls(
-            nodeId=parse_uuid(data["nodeID"], "nodeID"),
+            nodeID=parse_uuid(data["nodeID"], "nodeID"),
             lastSeen=parse_datetime(
                 data.get("lastSeen", utcnow()),
                 "lastSeen",
-            )
+            ),
+            publicKey=data.get("publicKey"),
         )

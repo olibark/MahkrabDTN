@@ -47,6 +47,7 @@ class PollResponse:
             "serverTime": self.serverTime.isoformat(),
         }
         
+    @classmethod
     def from_dict(cls, data: Mapping[str, Any]) -> "PollResponse":
         return cls(
             nodeID=parse_uuid(data["nodeID"], "nodeID"),

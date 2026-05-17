@@ -14,7 +14,7 @@ requires-python = ">=3.11"
 dependencies = ["cryptography>=45,<46"]
 
 [project.scripts]
-mkdtn = "mahkrabdtn.cli:main"
+mkdtn = "mahkrabdtn.interface.cli:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
