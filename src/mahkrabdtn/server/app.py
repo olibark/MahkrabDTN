@@ -14,4 +14,5 @@ class RelayApplication:
         if databasePath is not None and (nodeRegistry is not None or messageStore is not None):
             raise ValueError("databasePath cannot be combined with custom registry or store")
         
-        if databasePath is not None: pass
+        if databasePath is not None: 
+            self.nodeRegistry = SQLiteNodeRegistry(databasePath=databasePath)
