@@ -395,6 +395,7 @@ class RelayNodeClient:
             return exponential
         
         jitterCeiling = exponential * self.retryPolicy.jitter
+        
         return min(
             exponential + uniform(0, jitterCeiling),
             self.retryPolicy.maxBackoff,

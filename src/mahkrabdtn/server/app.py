@@ -9,6 +9,7 @@ from time import sleep, monotonic
 
 from mahkrabdtn.server.registry import InMemoryNodeRegistry
 from mahkrabdtn.server.sql.sqliteregistry import SQLiteNodeRegistry
+from mahkrabdtn.server.sql.sqlitemessagestore import SQLiteMessageStore
 from mahkrabdtn.server.messagestore import InMemoryMessageStore
 from mahkrabdtn.protocol.node.registration import NodeRegistration
 from mahkrabdtn.protocol.packet import MessagePacket
@@ -24,7 +25,7 @@ class RelayApplication:
     def __init__(
         self, 
         nodeRegistry: InMemoryNodeRegistry | None = None,
-        messageStore: InMemoryNodeRegistry | None = None,
+        messageStore: InMemoryMessageStore | None = None,
         pollInterval_ms: int = 50,
         databasePath: str | None = None,
     ) -> None:
@@ -35,7 +36,7 @@ class RelayApplication:
         
         if databasePath is not None: 
             self.nodeRegistry = SQLiteNodeRegistry(databasePath=databasePath)
-            self.messageStore = SQLiteNodeRegistry(databasePath=databasePath)
+            self.messageStore = SQLiteMessageStore(databasePath=databasePath)
             self.storageBackend = "sqlite"
             
         else:
@@ -43,7 +44,7 @@ class RelayApplication:
             self.messageStore = messageStore or InMemoryMessageStore()
             self.storageBackend = "memory"
         
-        self.pollInterval_ms: int = 50
+        self.pollInterval_ms: int = pollInterval_ms
         
     def __call__(self, environ: dict[str, Any], startResponse: Any) -> Iterable[bytes]:
         requestMethod = str(environ.get("REQUEST_METHOD", ""))
@@ -145,20 +146,20 @@ class RelayApplication:
         
     def handle_node_lookup(self, requestMethod: str, pathInfo: str, startResponse: Any) -> Iterable[bytes]:
         if requestMethod != "GET":
-            return self.response_json(
+            return self.respond_json(
                 startResponse,
                 "405 Method Not Allowed",
                 {"error": "method not allowed"},
             )
             
         try:
-            nodeID = self.read_node_id_from_node_path(pathInfo)
-            state = self.require_node_satte(nodeID)
+            nodeID = self.read_nodeID_from_node_path(pathInfo)
+            state = self.nodeRegistry.require_node_state(nodeID)
             logger.info(
                 "relay.node.lookup",
                 extra={
                     "nodeID": str(state.nodeID),
-                    "hasPublicKey": state.public_key is not None,
+                    "hasPublicKey": state.publicKey is not None,
                 },
             )
             
@@ -199,10 +200,10 @@ class RelayApplication:
             )
             
         try:
-            requestMethod = self.read_json_body(environ)
-            packet = MessagePacket.from_dict(requestMethod)
+            requestData = self.read_json_body(environ)
+            packet = MessagePacket.from_dict(requestData)
             record = self.messageStore.accept_message(packet)
-            recipientState = self.nodeRegistry.get_node_state(packet)
+            recipientState = self.nodeRegistry.get_node_state(packet.recipientID)
             
             if recipientState is not None:
                 queuedCount = self.messageStore.count_queued_messages(
@@ -341,12 +342,18 @@ class RelayApplication:
             )
             return self.respond_json(
                 startResponse,
-                "200 OK",
-                {
-                    "messageID": str(record.packet.messageID),
-                    "state": record.state.value,
-                },
+                "400 Bad Request",
+                {"error": str(error)},
             )
+
+        return self.respond_json(
+            startResponse,
+            "200 OK",
+            {
+                "messageID": str(record.packet.messageID),
+                "state": record.state.value,
+            },
+        )
         
     def read_json_body(self, environ: dict[str, Any]) -> dict[str, Any]:
         contentLength = str(environ.get("CONTENT_LENGTH", "0")).strip() or "0"

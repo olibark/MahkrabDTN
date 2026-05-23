@@ -28,7 +28,10 @@ class RsaEncryption:
     
     def load_private_key(privateKeyPem: str) -> RSAPrivateKey:
         privateKeyPem = parse_text(privateKeyPem, "privateKeyPem")
-        key = serialization.load_pem_private_key(privateKeyPem.encode("utf-8"))
+        key = serialization.load_pem_private_key(
+            privateKeyPem.encode("utf-8"),
+            password=None,
+        )
         
         if not isinstance(key, RSAPrivateKey): raise TypeError("private key must be of type RSA private key")
         

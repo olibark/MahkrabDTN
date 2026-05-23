@@ -46,3 +46,4 @@ source.txt
 uv.lock
 .mkconfig
 todo
+tests/

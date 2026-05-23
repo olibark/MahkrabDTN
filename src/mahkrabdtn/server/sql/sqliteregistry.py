@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from mahkrabdtn.protocol.node.registration import NodeRegistration
 from mahkrabdtn.protocol.states import RelayNodeState
 from mahkrabdtn.tools.parsing.uuid import parse_uuid
-from mahkrabdtn.tools.database.connect import connect_database
+from mahkrabdtn.server.sql.sqlite import connect_database
 
 
 @dataclass(slots=True)
@@ -36,6 +36,33 @@ class SQLiteNodeRegistry:
             }
             if "publicKey" not in existingColumns:
                 connection.execute("ALTER TABLE relayNodes ADD COLUMN publicKey TEXT")
+            
+            oldRelayNodesExists = connection.execute(
+                """
+                SELECT 1
+                FROM sqlite_master
+                WHERE type = 'table' AND name = 'relay_nodes'
+                """
+            ).fetchone()
+            if oldRelayNodesExists is not None:
+                connection.execute(
+                    """
+                    INSERT OR IGNORE INTO relayNodes (
+                        nodeID,
+                        lastSeen,
+                        publicKey,
+                        isPolling,
+                        pendingMessageCount
+                    )
+                    SELECT
+                        node_id,
+                        last_seen_at,
+                        public_key,
+                        is_polling,
+                        pending_message_count
+                    FROM relay_nodes
+                    """
+                )
             
             connection.commit()
     
@@ -93,6 +120,7 @@ class SQLiteNodeRegistry:
         with self.lock:
             state = self.require_node_state(nodeID)
             state.pendingMessageCount = pendingMessageCount
+            self.upsert_state(state)
             
             return state
         
