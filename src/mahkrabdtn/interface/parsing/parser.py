@@ -14,6 +14,10 @@ from mahkrabdtn.interface.commands import (
     run_send,
     run_serve,
 )
+from mahkrabdtn.interface.commands.polling import (
+    DEFAULT_WATCH_TIMEOUT_MS,
+    DEFAULT_WATCH_WAIT_MS,
+)
 from mahkrabdtn.interface.parsing.args import add_client_args, add_json_arg
 
 
@@ -148,10 +152,26 @@ def add_poll_parser(subparsers: ap._SubParsersAction[ap.ArgumentParser]) -> None
     add_client_args(parser)
     parser.add_argument(
         "--timeout-ms",
+        "--poll-time-ms",
+        dest="timeout_ms",
         type=int,
-        default=0,
+        default=None,
         metavar="<ms>",
-        help="Long-poll timeout in milliseconds (default: 0)",
+        help=f"Long-poll timeout in milliseconds (default: 0, or {DEFAULT_WATCH_TIMEOUT_MS} with --watch)",
+    )
+    parser.add_argument(
+        "--watch",
+        "--continuous",
+        dest="watch",
+        action="store_true",
+        help="Continuously poll until interrupted",
+    )
+    parser.add_argument(
+        "--wait-ms",
+        type=int,
+        default=DEFAULT_WATCH_WAIT_MS,
+        metavar="<ms>",
+        help=f"Delay between watch polls in milliseconds (default: {DEFAULT_WATCH_WAIT_MS})",
     )
     parser.add_argument(
         "--ack",
