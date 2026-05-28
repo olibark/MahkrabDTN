@@ -25,6 +25,15 @@ mkdtn send <recipient-node-id> "hello"
 mkdtn poll --ack
 ```
 
+Open the terminal messenger when you want to send and receive in one terminal:
+
+```sh
+mkdtn tui
+```
+
+The TUI registers your node, polls for incoming messages, acknowledges received
+messages, and stores node aliases beside your identity file.
+
 Run a local relay when you do not want to use the default relay:
 
 ```sh

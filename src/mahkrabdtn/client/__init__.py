@@ -14,6 +14,10 @@ from mahkrabdtn.client.reciepts import (
     MessageAcknowledgmentReceipt,
     MessageSubmissionReceipt,
 )
+from mahkrabdtn.client.store.aliases import (
+    NodeAlias,
+    NodeAliasBook,
+)
 from mahkrabdtn.client.store.processedmessages import (
     ProcessedMessagesStore,
 )
@@ -28,5 +32,7 @@ __all__ = [
     "create_node_id",
     "MessageAcknowledgmentReceipt",
     "MessageSubmissionReceipt",
+    "NodeAlias",
+    "NodeAliasBook",
     "ProcessedMessagesStore",
 ]

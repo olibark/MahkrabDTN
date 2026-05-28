@@ -13,6 +13,7 @@ from mahkrabdtn.interface.commands import (
     run_register,
     run_send,
     run_serve,
+    run_tui,
 )
 from mahkrabdtn.interface.commands.polling import (
     DEFAULT_WATCH_TIMEOUT_MS,
@@ -27,7 +28,7 @@ def create_parser() -> ap.ArgumentParser:
         epilog=(
             "Commands: serve (run a relay), identity (create or show node identity), "
             "register (register with relay), send (send a message), poll (receive messages), "
-            "ack (acknowledge a message), health (check relay health)."
+            "tui (open messenger), ack (acknowledge a message), health (check relay health)."
         ),
     )
     parser.add_argument(
@@ -44,6 +45,7 @@ def create_parser() -> ap.ArgumentParser:
     add_register_parser(subparsers)
     add_send_parser(subparsers)
     add_poll_parser(subparsers)
+    add_tui_parser(subparsers)
     add_ack_parser(subparsers)
     add_health_parser(subparsers)
     return parser
@@ -180,6 +182,47 @@ def add_poll_parser(subparsers: ap._SubParsersAction[ap.ArgumentParser]) -> None
     )
     add_json_arg(parser)
     parser.set_defaults(func=run_poll)
+
+
+def add_tui_parser(subparsers: ap._SubParsersAction[ap.ArgumentParser]) -> None:
+    parser = subparsers.add_parser("tui", help="Open the terminal messenger")
+    add_client_args(parser)
+    parser.add_argument(
+        "--poll-time-ms",
+        dest="pollTimeout_ms",
+        type=int,
+        default=DEFAULT_WATCH_TIMEOUT_MS,
+        metavar="<ms>",
+        help=f"Long-poll timeout in milliseconds (default: {DEFAULT_WATCH_TIMEOUT_MS})",
+    )
+    parser.add_argument(
+        "--wait-ms",
+        dest="pollWait_ms",
+        type=int,
+        default=DEFAULT_WATCH_WAIT_MS,
+        metavar="<ms>",
+        help=f"Delay between completed polls in milliseconds (default: {DEFAULT_WATCH_WAIT_MS})",
+    )
+    parser.add_argument(
+        "--alias-file",
+        dest="aliasPath",
+        type=Path,
+        metavar="<file>",
+        help="JSON file for node aliases (default: next to identity)",
+    )
+    parser.add_argument(
+        "--no-auto-register",
+        dest="noAutoRegister",
+        action="store_true",
+        help="Do not register the local node when the TUI starts",
+    )
+    parser.add_argument(
+        "--no-auto-ack",
+        dest="noAutoAck",
+        action="store_true",
+        help="Do not acknowledge received messages automatically",
+    )
+    parser.set_defaults(func=run_tui)
 
 
 def add_ack_parser(subparsers: ap._SubParsersAction[ap.ArgumentParser]) -> None:
