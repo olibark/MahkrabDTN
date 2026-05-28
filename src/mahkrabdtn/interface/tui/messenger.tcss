@@ -1,0 +1,199 @@
+Screen {
+    layout: vertical;
+    background: #060606;
+    color: #d0d0d0;
+}
+
+#layout {
+    height: 1fr;
+}
+
+#sidebar {
+    width: 38;
+    min-width: 32;
+    padding: 1;
+    background: #090909;
+    border: round #303030;
+}
+
+#sidebar.hidden {
+    display: none;
+}
+
+#main {
+    width: 1fr;
+    padding: 1 1 1 0;
+}
+
+#main.wide {
+    padding: 1;
+}
+
+.section-title {
+    color: #dddddd;
+    text-style: bold;
+    margin-top: 1;
+}
+
+#identity {
+    margin-bottom: 1;
+}
+
+#status {
+    color: #777777;
+    min-height: 2;
+}
+
+#registerButton {
+    width: 100%;
+    margin-bottom: 1;
+}
+
+Button {
+    background: #060606;
+    color: #d0d0d0;
+    border: round #3a3a3a;
+}
+
+Button.-style-default,
+Button.-style-default.-primary,
+Button.-style-default.-success,
+Button.-style-default.-warning,
+Button.-style-default.-error {
+    background: #060606;
+    color: #d0d0d0;
+    border: round #3a3a3a;
+    background-tint: transparent;
+}
+
+Button:hover {
+    background: #060606;
+    color: #cec8c8;
+}
+
+Button.-style-default:hover,
+Button.-style-default.-primary:hover,
+Button.-style-default.-success:hover,
+Button.-style-default.-warning:hover,
+Button.-style-default.-error:hover {
+    background: #060606;
+    color: #cec8c8;
+    border: round #4a4a4a;
+    background-tint: transparent;
+}
+
+Button:focus {
+    background: #060606;
+    color: #cec8c8;
+    text-style: bold;
+}
+
+Button.-style-default:focus,
+Button.-style-default.-primary:focus,
+Button.-style-default.-success:focus,
+Button.-style-default.-warning:focus,
+Button.-style-default.-error:focus {
+    background: #060606;
+    color: #cec8c8;
+    border: round #5a5a5a;
+    background-tint: transparent;
+    text-style: bold;
+}
+
+Button.-style-default.-active,
+Button.-style-default.-primary.-active,
+Button.-style-default.-success.-active,
+Button.-style-default.-warning.-active,
+Button.-style-default.-error.-active {
+    background: #060606;
+    color: #cec8c8;
+    border: round #2f2f2f;
+    background-tint: transparent;
+}
+
+#registerButton,
+#aliasButtons Button {
+    background: #090909;
+}
+
+#registerButton:hover,
+#aliasButtons Button:hover,
+#registerButton:focus,
+#aliasButtons Button:focus {
+    background: #090909;
+}
+
+#aliasList {
+    height: 1fr;
+    min-height: 8;
+    background: #080808;
+    border: round #303030;
+    margin-bottom: 1;
+}
+
+.alias-row {
+    height: 2;
+}
+
+#aliasInput,
+#aliasNodeInput {
+    margin-bottom: 1;
+    background: #090909;
+}
+
+Input {
+    background: #060606;
+    color: #d8d8d8;
+    border: round #303030;
+    background-tint: transparent;
+}
+
+Input:focus {
+    border: round #585858;
+    background-tint: transparent;
+}
+
+Input > .input--cursor {
+    background: transparent;
+    color: #d8d8d8;
+    text-style: underline;
+}
+
+#aliasButtons {
+    height: 3;
+    background: #090909;
+}
+
+#aliasButtons Button {
+    width: 1fr;
+}
+
+#messages {
+    height: 1fr;
+    border: round #303030;
+    padding: 0 1;
+    background: #080808;
+    scrollbar-background: #080808;
+    scrollbar-background-hover: #101010;
+    scrollbar-background-active: #141414;
+    scrollbar-color: #303030;
+    scrollbar-color-hover: #4a4a4a;
+    scrollbar-color-active: #5c5c5c;
+    scrollbar-corner-color: #270c96;
+}
+
+#composer {
+    height: 3;
+    margin-top: 1;
+    background: #060606;
+}
+
+#recipientInput {
+    width: 36;
+    background: #060606;
+}
+
+#messageInput {
+    width: 1fr;
+    background: #060606;
+}
