@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mahkrabdtn"
-version = "0.0.1a1"
+version = "1.0.0"
 readme = "README.md"
 description = "Delay-tolerant encrypted messaging"
 license = "MIT"
